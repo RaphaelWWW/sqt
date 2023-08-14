@@ -6,13 +6,12 @@ import Score from "./Score.js";
  * @author A. Freddie Page
  * @version 2022.23
  */
-const Tetris = {};
 
+const Tetris = {};
 
 //----------------------------------------------------------------------------//
 // ## Type Definitions                                                        //
 //----------------------------------------------------------------------------//
-
 
 /**
  * A Tetris Game is all the information required to represent the current state
@@ -471,13 +470,15 @@ Tetris.rotate_ccw = function (game) {
     return R.mergeRight(game, {"current_tetromino": new_rotation});
 };
 
-const descend = function (game) {
+const descend = function (game, points = 0) {
     const new_position = [game.position[0], game.position[1] + 1];
     if (is_blocked(game.field, game.current_tetromino, new_position)) {
         return game;
     }
+    game = R.mergeRight(game, {"score": Score.add_points( game.score, points)});
     return R.mergeRight(game, {"position": new_position});
 };
+
 
 /**
  * Attempt to perform a soft drop, where the piece descends one position.
@@ -492,7 +493,7 @@ Tetris.soft_drop = function (game) {
     if (Tetris.is_game_over(game)) {
         return game;
     }
-    return descend(game);
+    return descend(game,1);
 };
 
 /**
@@ -509,7 +510,7 @@ Tetris.hard_drop = function (game) {
     if (Tetris.is_game_over(game)) {
         return game;
     }
-    const dropped_once = descend(game);
+    const dropped_once = descend(game,2);
     if (R.equals(game, dropped_once)) {
         return Tetris.next_turn(game);
     }
@@ -537,6 +538,7 @@ const pad_field = function (short_field) {
     const new_rows = R.times(new_line, missing_row_count);
     return [...new_rows, ...short_field];
 };
+
 
 const clear_lines = R.pipe(
     R.reject(is_complete_line),
@@ -584,6 +586,17 @@ Tetris.next_turn = function (game) {
     const locked_field = lock(game);
 
     const cleared_field = clear_lines(locked_field);
+
+    let linesCleared = 0;
+   
+    locked_field.forEach((line)=>{
+        if(is_complete_line(line)){
+            linesCleared++;
+        } 
+    });
+
+
+    game.score = Score.cleared_lines(linesCleared, game.score);
 
     const [next_tetromino, bag] = game.bag();
 

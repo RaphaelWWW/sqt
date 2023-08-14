@@ -3,6 +3,8 @@ import Score from "../Score.js";
 import R from "../ramda.js";
 
 const example_game = Tetris.new_game();
+const triple_example = Tetris.new_game();
+const backtoback_example = Tetris.new_game();
 const field_string = `----------
 ----------
 ----------
@@ -25,7 +27,58 @@ SSSZ-IOOJJ
 TSZZ-IOOJJ
 TTZL-IOOJJ
 TLLL-IOOJJ`;
+const field_string_fortriple = `----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+-S--------
+SSS--LLLLL
+SSSZ-IOOJJ
+TSZZ-IOOJJ
+TTZL-IOOJJ
+TLLL-IOOJJ`;
+const field_string_forbacktoback =  `----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+----------
+-S--------
+SSS-------
+SSSZ-IOOJJ
+TSZZ-IOOJJ
+TTZL-IOOJJ
+TLLL-IOOJJ
+SSSZ-IOOJJ
+TSZZ-IOOJJ
+TTZL-IOOJJ
+TLLL-IOOJJ`
+
 example_game.field = field_string.split("\n").map(
+    (s) => s.replace(/-/g, " ").split("")
+);
+triple_example.field =field_string_fortriple.split("\n").map(
+    (s) => s.replace(/-/g, " ").split("")
+);
+backtoback_example.field = field_string_forbacktoback.split("\n").map(
     (s) => s.replace(/-/g, " ").split("")
 );
 
@@ -75,6 +128,7 @@ describe("Score", function () {
 
             // I could use hard_drop here, but that would also score.
             // Instead wait for it to drop 22 times.
+            game=Tetris.rotate_ccw(game);
             R.range(0, 22).forEach(function () {
                 game = Tetris.next_turn(game);
             });
@@ -89,55 +143,112 @@ describe("Score", function () {
         `A double line clear scores 300 × level`,
         function () {
             // Implement this function.
-            throw new Error("Unimplemented");
+            let game = example_game;
+            game.current_tetromino = Tetris.J_tetromino;
+
+            game = Tetris.rotate_ccw(game);
+            R.range(0, 22).forEach(function () {
+                game = Tetris.next_turn(game);
+            });
+
+            if (game.score.score !== 300) {
+                throw new Error("A double row cleared should score 300");
+            }
+
         }
     );
 
     it(
         `A triple line clear scores 500 × level`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = triple_example;
+            game.current_tetromino = Tetris.L_tetromino;
+            game = Tetris.rotate_ccw(game);
+            game = Tetris.rotate_ccw(game);
+            game = Tetris.rotate_ccw(game);
+            R.range(0, 22).forEach(function () {
+                game = Tetris.next_turn(game);
+            });
+
+            console.log(game);
+            if (game.score.score !== 500) {
+                throw new Error("A triple row cleared should score 500");
+            }
         }
     );
 
     it(
         `A tetris scores 800 × level`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = example_game;
+            game.current_tetromino = Tetris.I_tetromino;
+            game = Tetris.rotate_ccw(game);
+            R.range(0, 22).forEach(function () {
+                game = Tetris.next_turn(game);
+            });
+
+            console.log(game);
+            if (game.score.score !== 800) {
+                throw new Error("A Tetris row cleared should score 800");
+            }
         }
     );
 
     it(
         `Back to back tetrises score 1200 × level`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = backtoback_example;
+            R.range(0,2).forEach(function(){
+                game.current_tetromino = Tetris.I_tetromino;
+                game = Tetris.rotate_ccw(game);
+                R.range(0, 22).forEach(function () {
+                    game = Tetris.next_turn(game);
+                });
+            })
+
+            console.log(game);
+            if (game.score.score !== 2000) {
+                throw new Error("A back to back tetrises should score 1200");
+            }
         }
     );
 
     it(
         `A soft drop score 1 point per cell descended`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = example_game;
+            game.current_tetromino = Tetris.I_tetromino;
+            game = Tetris.soft_drop(game);
+            if (game.score.score !== 1) {
+                throw new Error("A soft drop scoring system is not implemented");
+            }
         }
     );
 
     it(
         `A hard drop score 2 point per cell descended`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = example_game;
+            game.current_tetromino = Tetris.I_tetromino;
+            game = Tetris.hard_drop(game);
+            if (game.score.score !== 34) {
+                throw new Error("A hard drop scoring system is not implemented");
+            }
         }
     );
 
     it(
         `Advancing the turn without manually dropping scores nothing.`,
         function () {
-            // Implement this function.
-            throw new Error("Unimplemented");
+            let game = example_game;
+            game.current_tetromino = Tetris.I_tetromino;
+            R.range(0, 22).forEach(function () {
+                game = Tetris.next_turn(game);
+            });
+            console.log(game);
+            if (game.score.score !== 0) {
+                throw new Error("You shouldn't score any without manually dropping");
+            }
         }
     );
 });

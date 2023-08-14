@@ -11,7 +11,7 @@ document.documentElement.style.setProperty("--grid-rows", grid_rows);
 document.documentElement.style.setProperty("--grid-columns", grid_columns);
 
 const grid = document.getElementById("grid");
-
+console.log(game);
 const cells = R.range(0, grid_rows).map(function () {
     const row = document.createElement("div");
     row.className = "row";
@@ -72,7 +72,9 @@ const update_grid = function () {
     );
 
     // Add code below to display the score information.
-
+    document.getElementById("currentScore").innerText = game?.score?.score || 0;
+    document.getElementById("linesCleared").innerText = game?.score?.lines_cleared || 0;
+    document.getElementById("currentLevel").innerText = Score.level(game.score);
 };
 
 // Don't allow the player to hold down the rotate key.
@@ -104,12 +106,13 @@ document.body.onkeydown = function (event) {
 
 const timer_function = function () {
     game = Tetris.next_turn(game);
+    const level = Score.level(game.score)
     update_grid();
-    setTimeout(timer_function, 500);
+    setTimeout(timer_function, 2500/(level + 4));
 };
 
 // This first timeout starts the game. it's only called once.
-// From here on the timer_function above is called.
+// From here on the timer_functoin above is called.
 setTimeout(timer_function, 500);
 
 update_grid();
