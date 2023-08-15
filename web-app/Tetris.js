@@ -583,17 +583,21 @@ Tetris.next_turn = function (game) {
 
     // Otherwise, we can't descend and we've not lost,
     // So lock the current piece in place and deploy the next.
+    
+
     const locked_field = lock(game);
 
-    const cleared_field = clear_lines(locked_field);
-
     let linesCleared = 0;
-   
+
+       
     locked_field.forEach((line)=>{
         if(is_complete_line(line)){
             linesCleared++;
         } 
     });
+
+    const cleared_field = clear_lines(locked_field);
+
 
 
     game.score = Score.cleared_lines(linesCleared, game.score);
